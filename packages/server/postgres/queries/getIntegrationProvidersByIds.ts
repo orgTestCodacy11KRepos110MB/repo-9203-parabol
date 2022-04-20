@@ -40,6 +40,10 @@ export interface IntegrationProviderMattermost extends Omit<IntegrationProviderW
   scopeGlobal: false
 }
 
+export interface IntegrationProviderMSTeams extends IntegrationProviderWebhook {
+  service: 'msTeams'
+}
+
 export interface IntegrationProviderGitLabOAuth2 extends IntegrationProviderOAuth2 {
   service: 'gitlab'
 }
@@ -53,7 +57,7 @@ export interface IntegrationProviderJiraServer extends IntegrationProviderOAuth1
 }
 
 export interface IntegrationProviderAzureDevOps extends IntegrationProviderOAuth2 {
-  service: 'azureDevOps',
+  service: 'azureDevOps'
   tenantId: string
 }
 
@@ -63,6 +67,7 @@ export type TIntegrationProvider =
   | IntegrationProviderGitLabPAT
   | IntegrationProviderJiraServer
   | IntegrationProviderAzureDevOps
+  | IntegrationProviderMSTeams
 
 const getIntegrationProvidersByIds = async <T = TIntegrationProvider>(ids: readonly number[]) => {
   const providers = await getIntegrationProvidersByIdsQuery.run({ids}, getPg())

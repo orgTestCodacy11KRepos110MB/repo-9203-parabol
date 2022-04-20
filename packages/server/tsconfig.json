@@ -9,15 +9,8 @@
       "parabol-client/*": ["client/*"],
       "~/*": ["client/*"]
     },
-    "lib": [
-      "esnext",
-      "dom"
-    ],
-    "types": [
-      "node",
-      "jest",
-      "jest-extended"
-    ]
+    "lib": ["esnext", "dom"],
+    "types": ["node", "jest", "jest-extended"]
   },
 
   "exclude": [
@@ -35,6 +28,7 @@
     "graphql/types/AzureDevOpsWorkItem.ts",
     "graphql/types/AzureDevOpsRemoteProject.ts",
     "graphql/types/AzureDevOpsIntegration.ts",
+    "graphql/types/MSTeamsIntegration.ts",
     "dataloader/azureDevOpsLoaders.ts",
     "billing/debug.ts",
     "hubspot/backfillHubSpot.ts",

@@ -1,4 +1,6 @@
 import {GraphQLID, GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType} from 'graphql'
+import {IGetTeamMemberIntegrationAuthQueryResult} from '../../postgres/queries/generated/getTeamMemberIntegrationAuthQuery'
+import {IntegrationProviderAzureDevOps} from '../../postgres/queries/getIntegrationProvidersByIds'
 import {getUserId, isTeamMember} from '../../utils/authorization'
 import AzureDevOpsServerManager from '../../utils/AzureDevOpsServerManager'
 import standardError from '../../utils/standardError'
@@ -8,10 +10,13 @@ import {AzureDevOpsWorkItemConnection} from './AzureDevOpsWorkItem'
 import GraphQLISO8601Type from './GraphQLISO8601Type'
 import IntegrationProviderOAuth2 from './IntegrationProviderOAuth2'
 import TeamMemberIntegrationAuthOAuth2 from './TeamMemberIntegrationAuthOAuth2'
-import {IGetTeamMemberIntegrationAuthQueryResult} from '../../postgres/queries/generated/getTeamMemberIntegrationAuthQuery'
-import {IntegrationProviderAzureDevOps} from '../../postgres/queries/getIntegrationProvidersByIds';
 
-type IntegrationProviderServiceEnum = 'azureDevOps' | 'gitlab' | 'jiraServer' | 'mattermost'
+type IntegrationProviderServiceEnum =
+  | 'azureDevOps'
+  | 'gitlab'
+  | 'jiraServer'
+  | 'mattermost'
+  | 'msTeams'
 
 type WorkItemArgs = {
   first: number

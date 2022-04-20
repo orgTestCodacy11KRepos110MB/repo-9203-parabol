@@ -24,6 +24,11 @@ const UserFeatureFlags = new GraphQLObjectType<any, GQLContext>({
       type: new GraphQLNonNull(GraphQLBoolean),
       description: 'true if azureDevOps is allowed',
       resolve: ({azureDevOps}) => !!azureDevOps
+    },
+    msTeams: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      description: 'true if msTeams is allowed',
+      resolve: ({msTeams}) => !!msTeams
     }
   })
 })

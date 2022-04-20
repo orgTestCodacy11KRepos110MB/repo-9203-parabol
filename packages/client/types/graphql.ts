@@ -48402,6 +48402,7 @@ export const enum IntegrationProviderServiceEnum {
   gitlab = 'gitlab',
   mattermost = 'mattermost',
   jiraServer = 'jiraServer',
+  msTeams = 'msTeams'
 }
 
 /**
@@ -49854,6 +49855,11 @@ export interface ITeamMemberIntegrations {
    * All things associated with a slack integration for a team member
    */
   slack: ISlackIntegration | null;
+
+   /**
+   * All things associated with a Microsoft Teams integration for a team member
+   */
+  msTeams: IMSTeamsIntegration | null;
 }
 
 /**
@@ -50455,6 +50461,23 @@ export interface ITeamMemberIntegrationAuthOAuth2 {
  */
 export interface IMattermostIntegration {
   __typename: 'MattermostIntegration';
+
+  /**
+   * The OAuth2 Authorization for this team member
+   */
+  auth: ITeamMemberIntegrationAuthWebhook | null;
+
+  /**
+   * The non-global providers shared with the team or organization
+   */
+  sharedProviders: Array<IIntegrationProviderWebhook>;
+}
+
+/**
+ * Integration Auth and shared providers available to the team member
+ */
+ export interface IMSTeamsIntegration {
+  __typename: 'MSTeamsIntegration';
 
   /**
    * The OAuth2 Authorization for this team member
