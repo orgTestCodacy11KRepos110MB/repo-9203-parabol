@@ -21,6 +21,7 @@ import EndCheckInPayload from '../types/EndCheckInPayload'
 import sendMeetingEndToSegment from './helpers/endMeeting/sendMeetingEndToSegment'
 import sendNewMeetingSummary from './helpers/endMeeting/sendNewMeetingSummary'
 import {endMattermostMeeting} from './helpers/notifications/notifyMattermost'
+import {endMSTeamsMeeting} from './helpers/notifications/notifyMSTeams'
 import {endSlackMeeting} from './helpers/notifications/notifySlack'
 import removeEmptyTasks from './helpers/removeEmptyTasks'
 
@@ -224,6 +225,7 @@ export default {
     const result = await finishCheckInMeeting(completedCheckIn, dataLoader)
     endSlackMeeting(meetingId, teamId, dataLoader).catch(console.log)
     endMattermostMeeting(meetingId, teamId, dataLoader).catch(console.log)
+    endMSTeamsMeeting(meetingId, teamId, dataLoader).catch(console.log)
     const updatedTaskIds = (result && result.updatedTaskIds) || []
     sendMeetingEndToSegment(completedCheckIn, meetingMembers as MeetingMember[])
     sendNewMeetingSummary(completedCheckIn, context).catch(console.log)

@@ -1,11 +1,11 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {MeetingTypeEnum} from '../../postgres/types/Meeting'
 import getRethink from '../../database/rethinkDriver'
 import ActionMeetingMember from '../../database/types/ActionMeetingMember'
 import MeetingAction from '../../database/types/MeetingAction'
 import generateUID from '../../generateUID'
 import updateTeamByTeamId from '../../postgres/queries/updateTeamByTeamId'
+import {MeetingTypeEnum} from '../../postgres/types/Meeting'
 import {getUserId, isTeamMember} from '../../utils/authorization'
 import publish from '../../utils/publish'
 import standardError from '../../utils/standardError'
@@ -14,6 +14,7 @@ import StartCheckInPayload from '../types/StartCheckInPayload'
 import createNewMeetingPhases from './helpers/createNewMeetingPhases'
 import isStartMeetingLocked from './helpers/isStartMeetingLocked'
 import {startMattermostMeeting} from './helpers/notifications/notifyMattermost'
+import {startMSTeamsMeeting} from './helpers/notifications/notifyMSTeams'
 import {startSlackMeeting} from './helpers/notifications/notifySlack'
 import sendMeetingStartToSegment from './helpers/sendMeetingStartToSegment'
 
@@ -102,6 +103,7 @@ export default {
 
     startSlackMeeting(meetingId, teamId, dataLoader).catch(console.log)
     startMattermostMeeting(meetingId, teamId, dataLoader).catch(console.log)
+    startMSTeamsMeeting(meetingId, teamId, dataLoader).catch(console.log)
     sendMeetingStartToSegment(meeting)
     const data = {teamId, meetingId}
     publish(SubscriptionChannel.TEAM, teamId, 'StartCheckInSuccess', data, subOptions)
