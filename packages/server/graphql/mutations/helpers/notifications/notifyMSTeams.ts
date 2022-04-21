@@ -10,11 +10,12 @@ const notifyMSTeams = async (
   webhookUrl: string,
   userId: string,
   teamId: string,
-  textOrAttachmentsArray: string | unknown[]
+  textOrAttachmentsArray: string
   // notificationText?: string
 ) => {
   const manager = new MSTeamsServerManager(webhookUrl)
-  const result = await manager.postMessage(textOrAttachmentsArray)
+  //const result = await manager.postMessage(textOrAttachmentsArray)
+  const result = await manager.post(textOrAttachmentsArray)
   if (result instanceof Error) {
     sendToSentry(result, {userId, tags: {teamId, event, webhookUrl}})
     return result

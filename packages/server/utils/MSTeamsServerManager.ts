@@ -42,14 +42,14 @@ abstract class MSTeamsManager {
 
   // See
 
-  private async post(payload: any) {
+  async post(payload: any) {
     const res = await this.fetchWithTimeout(this.webhookUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
+        Accept: 'application/json' as const,
+        'Content-Type': 'application/json;charset=utf-8'
       },
-      body: JSON.stringify(payload)
+      body: payload
     })
     if (res instanceof Error) return res
     if (res.status !== 200) {
