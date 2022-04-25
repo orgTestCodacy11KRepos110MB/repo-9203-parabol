@@ -3,10 +3,13 @@ import makeAppURL from 'parabol-client/utils/makeAppURL'
 import appOrigin from '../../../../appOrigin'
 import {MSTeamsNotificationEventEnum as EventEnum} from '../../../../database/types/MSTeamsNotification'
 import {IntegrationProviderMSTeams} from '../../../../postgres/queries/getIntegrationProvidersByIds'
+import {Team} from '../../../../postgres/queries/getTeamsByIds'
+import {AnyMeeting} from '../../../../postgres/types/Meeting'
 import MSTeamsServerManager from '../../../../utils/MSTeamsServerManager'
 import segmentIo from '../../../../utils/segmentIo'
 import sendToSentry from '../../../../utils/sendToSentry'
 import {DataLoaderWorker} from '../../../graphql'
+import getSummaryText from './getSummaryText'
 
 const notifyMSTeams = async (
   event: EventEnum,
@@ -56,60 +59,30 @@ export const startMSTeamsMeeting = async (
   }
   const options = {searchParams}
   const meetingUrl = makeAppURL(appOrigin, `meet/${meetingId}`, options)
+  const urlLink = `https:/prbl.in/${meetingId}`
 
   const card = new AdaptiveCards.AdaptiveCard()
   card.version = new AdaptiveCards.Version(1.2, 0)
 
-  const titleTextBlock = new AdaptiveCards.TextBlock('Meeting Started 👋')
-  titleTextBlock.wrap = true
-  // titleTextBlock.size = 'large'
-  // titleTextBlock.weight  = 'bolder'
+  const meetingTitle = 'Meeting Started 👋'
+  const titleTextBlock = GenerateACMeetingTitle(meetingTitle)
   card.addItem(titleTextBlock)
 
-  const meetingDetailColumnSet = new AdaptiveCards.ColumnSet()
-  const teamDetailColumn = new AdaptiveCards.Column()
-  teamDetailColumn.width = 'stretch'
-
-  const teamHeaderTextBlock = new AdaptiveCards.TextBlock('Team: ')
-  teamHeaderTextBlock.wrap = true
-  // teamHeaderTextBlock.weight = 'bolder'
-
-  const teamValueTextBlock = new AdaptiveCards.TextBlock()
-  teamValueTextBlock.text = team.name
-  teamValueTextBlock.wrap = true
-
-  teamDetailColumn.addItem(teamHeaderTextBlock)
-  teamDetailColumn.addItem(teamValueTextBlock)
-
-  const meetingDetailColumn = new AdaptiveCards.Column()
-  meetingDetailColumn.width = 'stretch'
-  const meetingHeaderTextBlock = new AdaptiveCards.TextBlock('Meeting: ')
-  meetingHeaderTextBlock.wrap = true
-  // meetingHeaderTextBlock.weight = 'bolder'
-
-  const meetingValueTextBlock = new AdaptiveCards.TextBlock()
-  meetingValueTextBlock.text = meeting.name
-  meetingValueTextBlock.wrap = true
-
-  meetingDetailColumn.addItem(meetingHeaderTextBlock)
-  meetingDetailColumn.addItem(meetingValueTextBlock)
-
-  meetingDetailColumnSet.addColumn(teamDetailColumn)
-  meetingDetailColumnSet.addColumn(meetingDetailColumn)
+  const meetingDetailColumnSet = GenerateACMeetingAndTeamsDetails(team, meeting)
   card.addItem(meetingDetailColumnSet)
 
   const meetingLinkColumnSet = new AdaptiveCards.ColumnSet()
-  // meetingLinkColumnSet.spacing = 'extraLarge'
+  meetingLinkColumnSet.spacing = AdaptiveCards.Spacing.ExtraLarge
   const meetingLinkColumn = new AdaptiveCards.Column()
   meetingLinkColumn.width = 'stretch'
   const meetingLinkHeaderTextBlock = new AdaptiveCards.TextBlock('Link: ')
   meetingLinkHeaderTextBlock.wrap = true
-  // meetingLinkHeaderTextBlock.weight= "bolder"
+  meetingLinkHeaderTextBlock.weight = AdaptiveCards.TextWeight.Bolder
   const meetingLinkTextBlock = new AdaptiveCards.TextBlock()
-  meetingLinkTextBlock.text = meetingUrl
+  meetingLinkTextBlock.text = urlLink
+  meetingLinkTextBlock.color = AdaptiveCards.TextColor.Accent
+  meetingLinkTextBlock.size = AdaptiveCards.TextSize.Small
   meetingLinkTextBlock.wrap = true
-  // meetingLinkTextBlock.size = "small"
-  // meetingLinkTextBlock.color = "accent"
   const joinMeetingActionSet = new AdaptiveCards.ActionSet()
   const joinMeetingAction = new AdaptiveCards.OpenUrlAction()
   joinMeetingAction.title = 'Join Meeting'
@@ -124,10 +97,10 @@ export const startMSTeamsMeeting = async (
 
   meetingLinkColumnSet.addColumn(meetingLinkColumn)
 
-  const attachments =
-    '{"@context": "https://schema.org/extensions", "@type": "MessageCard", "themeColor": "0072C6", "title": "Meeting Started 👋", "text": "Click **Here** to join the meeting!", "potentialAction": [ { "@type": "ActionCard", "name": "Send Feedback", "inputs": [ { "@type": "TextInput", "id": "feedback", "isMultiline": true, "title": "Let us know what you think about Actionable Messages" } ], "actions": [ { "@type": "HttpPOST", "name": "Send Feedback", "isPrimary": true, "target": "http://..." } ] }, { "@type": "OpenUri", "name": "Learn More", "targets": [ { "os": "default", "uri": "https://docs.microsoft.com/outlook/actionable-messages" } ] } ]}'
+  card.addItem(meetingLinkColumnSet)
 
-  console.log('teams notification sent')
+  const adaptivecard = JSON.stringify(card.toJSON())
+  const attachments = `{"type":"message", "attachments":[{"contentType":"application/vnd.microsoft.card.adaptive","contentUrl":null, "content": ${adaptivecard}}]}`
 
   return notifyMSTeams('meetingStart', webhookUrl, facilitatorUserId, teamId, attachments)
 }
@@ -147,25 +120,60 @@ export const endMSTeamsMeeting = async (
   ])
   if (!MSTeamsProvider || !team) return
   const {webhookUrl} = MSTeamsProvider as IntegrationProviderMSTeams
-  // const meetingUrl = makeAppURL(appOrigin, `meet/${meetingId}`)
-
   const card = new AdaptiveCards.AdaptiveCard()
   card.version = new AdaptiveCards.Version(1.2, 0)
 
-  const titleTextBlock = new AdaptiveCards.TextBlock('Meeting Started 👋')
-  titleTextBlock.wrap = true
-  // titleTextBlock.size = 'large'
-  // titleTextBlock.weight  = 'bolder'
+  const meetingTitle = 'Meeting Ended 🎉'
+  const titleTextBlock = GenerateACMeetingTitle(meetingTitle)
   card.addItem(titleTextBlock)
 
+  const meetingDetailColumnSet = GenerateACMeetingAndTeamsDetails(team, meeting)
+  card.addItem(meetingDetailColumnSet)
+
+  const summaryColumnSet = new AdaptiveCards.ColumnSet()
+  summaryColumnSet.spacing = AdaptiveCards.Spacing.ExtraLarge
+  const summaryColumn = new AdaptiveCards.Column()
+  summaryColumn.width = 'stretch'
+  const summaryTextBlock = new AdaptiveCards.TextBlock()
+  summaryTextBlock.text = getSummaryText(meeting)
+  summaryTextBlock.wrap = true
+  summaryColumn.addItem(summaryTextBlock)
+  summaryColumnSet.addColumn(summaryColumn)
+  card.addItem(summaryColumnSet)
+
+  const meetingEndedActionsColumnSet = new AdaptiveCards.ColumnSet()
+  meetingEndedActionsColumnSet.spacing = AdaptiveCards.Spacing.ExtraLarge
+  const meetingEndedActionsColumn = new AdaptiveCards.Column()
+  meetingEndedActionsColumn.width = 'auto'
+
+  const placeHolderTextBlock = new AdaptiveCards.TextBlock()
+  placeHolderTextBlock.text = 'Action buttons go here'
+  placeHolderTextBlock.wrap = true
+  meetingEndedActionsColumn.addItem(placeHolderTextBlock)
+  meetingEndedActionsColumnSet.addColumn(meetingEndedActionsColumn)
+
+  card.addItem(meetingEndedActionsColumnSet)
+
+  const adaptivecard = JSON.stringify(card.toJSON())
+  const attachments = `{"type":"message", "attachments":[{"contentType":"application/vnd.microsoft.card.adaptive","contentUrl":null, "content": ${adaptivecard}}]}`
+
+  return notifyMSTeams('meetingEnd', webhookUrl, facilitatorUserId, teamId, attachments)
+}
+function GenerateACMeetingTitle(meetingTitle: string) {
+  const titleTextBlock = new AdaptiveCards.TextBlock(meetingTitle)
+  titleTextBlock.wrap = true
+  titleTextBlock.size = AdaptiveCards.TextSize.Large
+  titleTextBlock.weight = AdaptiveCards.TextWeight.Bolder
+  return titleTextBlock
+}
+
+function GenerateACMeetingAndTeamsDetails(team: Team, meeting: AnyMeeting) {
   const meetingDetailColumnSet = new AdaptiveCards.ColumnSet()
   const teamDetailColumn = new AdaptiveCards.Column()
   teamDetailColumn.width = 'stretch'
-
   const teamHeaderTextBlock = new AdaptiveCards.TextBlock('Team: ')
   teamHeaderTextBlock.wrap = true
-  // teamHeaderTextBlock.weight = 'bolder'
-
+  teamHeaderTextBlock.weight = AdaptiveCards.TextWeight.Bolder
   const teamValueTextBlock = new AdaptiveCards.TextBlock()
   teamValueTextBlock.text = team.name
   teamValueTextBlock.wrap = true
@@ -177,8 +185,7 @@ export const endMSTeamsMeeting = async (
   meetingDetailColumn.width = 'stretch'
   const meetingHeaderTextBlock = new AdaptiveCards.TextBlock('Meeting: ')
   meetingHeaderTextBlock.wrap = true
-  // meetingHeaderTextBlock.weight = 'bolder'
-
+  meetingHeaderTextBlock.weight = AdaptiveCards.TextWeight.Bolder
   const meetingValueTextBlock = new AdaptiveCards.TextBlock()
   meetingValueTextBlock.text = meeting.name
   meetingValueTextBlock.wrap = true
@@ -188,14 +195,5 @@ export const endMSTeamsMeeting = async (
 
   meetingDetailColumnSet.addColumn(teamDetailColumn)
   meetingDetailColumnSet.addColumn(meetingDetailColumn)
-  card.addItem(meetingDetailColumnSet)
-
-  // let descriptionColumnSet = new AdaptiveCards.ColumnSet()
-  // descriptionColumnSet.spacing = "extraLarge"
-
-  const attachments =
-    '{"@context": "https://schema.org/extensions", "@type": "MessageCard", "themeColor": "0072C6", "title": "Meeting Ended 👋", "text": "Click **Here** to join the meeting!", "potentialAction": [ { "@type": "ActionCard", "name": "Send Feedback", "inputs": [ { "@type": "TextInput", "id": "feedback", "isMultiline": true, "title": "Let us know what you think about Actionable Messages" } ], "actions": [ { "@type": "HttpPOST", "name": "Send Feedback", "isPrimary": true, "target": "http://..." } ] }, { "@type": "OpenUri", "name": "Learn More", "targets": [ { "os": "default", "uri": "https://docs.microsoft.com/outlook/actionable-messages" } ] } ]}'
-
-  console.log('meeting ended notification sent')
-  return notifyMSTeams('meetingEnd', webhookUrl, facilitatorUserId, teamId, attachments)
+  return meetingDetailColumnSet
 }
