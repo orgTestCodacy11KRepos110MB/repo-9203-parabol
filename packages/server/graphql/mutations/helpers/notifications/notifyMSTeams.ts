@@ -120,6 +120,16 @@ export const endMSTeamsMeeting = async (
   ])
   if (!MSTeamsProvider || !team) return
   const {webhookUrl} = MSTeamsProvider as IntegrationProviderMSTeams
+
+  const searchParams = {
+    utm_source: 'MS Teams summary',
+    utm_medium: 'product',
+    utm_campaign: 'after-meeting'
+  }
+  const options = {searchParams}
+  const summaryUrl = makeAppURL(appOrigin, `new-summary/${meetingId}`, options)
+  const meetingUrl = makeAppURL(appOrigin, `meet/${meetingId}`, options)
+
   const card = new AdaptiveCards.AdaptiveCard()
   card.version = new AdaptiveCards.Version(1.2, 0)
 
@@ -143,14 +153,31 @@ export const endMSTeamsMeeting = async (
 
   const meetingEndedActionsColumnSet = new AdaptiveCards.ColumnSet()
   meetingEndedActionsColumnSet.spacing = AdaptiveCards.Spacing.ExtraLarge
-  const meetingEndedActionsColumn = new AdaptiveCards.Column()
-  meetingEndedActionsColumn.width = 'auto'
+  const meetingEndedDiscussionColumn = new AdaptiveCards.Column()
+  meetingEndedDiscussionColumn.width = 'auto'
+  const meetingEndedReviewColumn = new AdaptiveCards.Column()
+  meetingEndedReviewColumn.width = 'auto'
 
-  const placeHolderTextBlock = new AdaptiveCards.TextBlock()
-  placeHolderTextBlock.text = 'Action buttons go here'
-  placeHolderTextBlock.wrap = true
-  meetingEndedActionsColumn.addItem(placeHolderTextBlock)
-  meetingEndedActionsColumnSet.addColumn(meetingEndedActionsColumn)
+  const meetingEndedDiscussionActionSet = new AdaptiveCards.ActionSet()
+  const meetingEndedDiscussionAction = new AdaptiveCards.OpenUrlAction()
+  meetingEndedDiscussionAction.title = 'See discussion'
+  meetingEndedDiscussionAction.url = meetingUrl
+  meetingEndedDiscussionAction.id = 'joinMeeting'
+
+  meetingEndedDiscussionActionSet.addAction(meetingEndedDiscussionAction)
+  meetingEndedDiscussionColumn.addItem(meetingEndedDiscussionActionSet)
+
+  const meetingEndedReviewActionSet = new AdaptiveCards.ActionSet()
+  const meetingEndedReviewAction = new AdaptiveCards.OpenUrlAction()
+  meetingEndedReviewAction.title = 'Review summary'
+  meetingEndedReviewAction.url = summaryUrl
+  meetingEndedReviewAction.id = 'joinMeeting'
+
+  meetingEndedDiscussionActionSet.addAction(meetingEndedReviewAction)
+  meetingEndedDiscussionColumn.addItem(meetingEndedReviewActionSet)
+
+  meetingEndedActionsColumnSet.addColumn(meetingEndedDiscussionColumn)
+  meetingEndedActionsColumnSet.addColumn(meetingEndedReviewColumn)
 
   card.addItem(meetingEndedActionsColumnSet)
 
