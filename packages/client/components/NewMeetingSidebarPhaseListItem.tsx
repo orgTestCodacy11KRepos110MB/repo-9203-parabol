@@ -1,5 +1,6 @@
 import styled from '@emotion/styled'
-import React from 'react'
+import {useTour} from '@reactour/tour'
+import React, {useEffect} from 'react'
 import {NewMeetingPhaseTypeEnum} from '~/__generated__/NewMeetingSettingsToggleCheckIn_settings.graphql'
 import {PALETTE} from '../styles/paletteV3'
 import {NavSidebar} from '../types/constEnums'
@@ -128,6 +129,11 @@ interface Props {
 }
 
 const NewMeetingSidebarPhaseListItem = (props: Props) => {
+  const {setIsOpen} = useTour()
+  useEffect(() => {
+    setIsOpen(true)
+  }, [])
+
   const {
     handleClick,
     isActive,
