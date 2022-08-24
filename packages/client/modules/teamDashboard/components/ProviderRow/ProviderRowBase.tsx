@@ -40,7 +40,7 @@ const StatusLabel = styled('div')({
 
 const StatusIcon = styled(Icon)({
   fontSize: ICON_SIZE.MD18,
-  color: PALETTE.SUCCESS_LIGHT
+  color: PALETTE.JADE_500
 })
 
 const MenuSmallIcon = styled(Icon)({

@@ -37,6 +37,7 @@ export const enum PALETTE {
 
   JADE_400_30 = '#66BC8C4D',
 
+  JADE_500 = '#40B574',
   JADE_400 = '#66BC8C',
   JADE_300 = '#91E8B7',
 
@@ -75,7 +76,5 @@ export const enum PALETTE {
   TOMATO_700 = '#D5211A',
   TOMATO_800 = '#9F201E',
 
-  WHITE = '#FFFFFF',
-
-  SUCCESS_LIGHT = '#2db553'
+  WHITE = '#FFFFFF'
 }
