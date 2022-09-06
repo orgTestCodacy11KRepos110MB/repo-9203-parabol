@@ -4,7 +4,7 @@ import GQLExecutorChannelId from '../../client/shared/gqlIds/GQLExecutorChannelI
 import numToBase64 from './numToBase64'
 import sendToSentry from './sendToSentry'
 
-const STANDARD_TIMEOUT = ms('10s')
+const STANDARD_TIMEOUT = ms('40s')
 const ADHOC_TIMEOUT = ms('1m')
 
 interface Job {

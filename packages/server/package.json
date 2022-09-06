@@ -84,6 +84,7 @@
     "workbox-webpack-plugin": "^6.5.3"
   },
   "dependencies": {
+    "openai": "3.0.0",
     "@authenio/samlify-node-xmllint": "^2.0.0",
     "@graphql-tools/merge": "^8.2.3",
     "@graphql-tools/schema": "^8.3.2",
