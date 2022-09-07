@@ -77,23 +77,25 @@ const AddCommentMutation: StandardMutation<TAddCommentMutation> = (
     optimisticUpdater: (store) => {
       const {viewerId} = atmosphere
       const {comment} = variables
-      const {isAnonymous} = comment
+      const {isAnonymous, isBot} = comment
       const now = new Date().toJSON()
       const optimisticComment = createProxyRecord(store, 'Comment', {
         ...comment,
         createdAt: now,
         updatedAt: now,
-        createdBy: isAnonymous ? null : viewerId,
-        comtent: comment.content || makeEmptyStr(),
+        createdBy: isAnonymous ? null : isBot ? 'aGhostUser' : viewerId,
+        content: comment.content || makeEmptyStr(),
         isActive: true,
-        isViewerComment: true
+        isViewerComment: !isBot
       })
         .setLinkedRecord(store.get(viewerId)!, 'user')
         .setLinkedRecords([], 'reactjis')
         .setLinkedRecords([], 'replies')
       if (!isAnonymous) {
-        const viewer = store.getRoot().getLinkedRecord('viewer')
-        optimisticComment.setLinkedRecord(viewer, 'createdByUser')
+        const createdBy = isBot
+          ? store.getRoot().getLinkedRecord('aGhostUser')
+          : store.getRoot().getLinkedRecord('viewer')
+        optimisticComment.setLinkedRecord(createdBy, 'createdByUser')
       }
       const payload = createProxyRecord(store, 'payload', {})
       payload.setLinkedRecord(optimisticComment, 'comment')

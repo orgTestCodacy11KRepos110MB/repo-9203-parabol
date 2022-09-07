@@ -25,10 +25,11 @@ import AddPollButton from './AddPollButton'
 import AddTaskButton from './AddTaskButton'
 import Avatar from './Avatar/Avatar'
 import {DiscussionThreadables} from './DiscussionThreadList'
+import {createLocalPoll} from './Poll/local/newPoll'
 import SendCommentButton from './SendCommentButton'
+import SummarizeButton from './SummarizeButton'
 import CommentEditor from './TaskEditor/CommentEditor'
 import {ReplyMention, SetReplyMention} from './ThreadedItem'
-import {createLocalPoll} from './Poll/local/newPoll'
 
 const Wrapper = styled('div')<{isReply: boolean; isDisabled: boolean}>(({isDisabled, isReply}) => ({
   display: 'flex',
@@ -236,6 +237,39 @@ const DiscussionThreadInput = forwardRef((props: Props, ref: any) => {
     CreateTaskMutation(atmosphere, {newTask}, {})
   }
 
+  const summarizeTopic = () => {
+    const summary = `Summary: `
+    const content = {
+      blocks: [
+        {
+          key: '42si0',
+          text: `${summary}`,
+          type: 'unstyled',
+          depth: 0,
+          inlineStyleRanges: [],
+          entityRanges: [],
+          data: {}
+        }
+      ],
+      entityMap: {}
+    }
+
+    AddCommentMutation(
+      atmosphere,
+      {
+        comment: {
+          content: JSON.stringify(content),
+          isAnonymous: false,
+          discussionId,
+          threadParentId,
+          threadSortOrder: getMaxSortOrder() + SORT_STEP + dndNoise(),
+          isBot: true
+        }
+      },
+      {onError, onCompleted}
+    )
+  }
+
   const addPoll = () => {
     const threadSortOrder = getMaxSortOrder() + SORT_STEP + dndNoise()
     createLocalPoll(atmosphere, discussionId, threadSortOrder)
@@ -283,6 +317,7 @@ const DiscussionThreadInput = forwardRef((props: Props, ref: any) => {
       </CommentContainer>
       {isActionsContainerVisible && (
         <ActionsContainer>
+          {<SummarizeButton onClick={summarizeTopic} disabled={isActionsContainerDisabled} />}
           {allowTasks && (
             <AddTaskButton
               dataCy={`${dataCy}-task`}

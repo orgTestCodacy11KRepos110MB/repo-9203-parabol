@@ -27,6 +27,9 @@ const AddCommentInput = new GraphQLInputObjectType({
     },
     threadParentId: {
       type: GraphQLID
+    },
+    isBot: {
+      type: GraphQLBoolean
     }
   })
 })

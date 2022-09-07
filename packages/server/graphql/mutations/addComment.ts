@@ -20,6 +20,7 @@ type AddCommentMutationVariables = {
     discussionId: string
     content: string
     threadSortOrder: number
+    isBot: boolean
   }
 }
 
@@ -43,7 +44,7 @@ const addComment = {
     const subOptions = {mutatorId, operationId}
 
     //AUTH
-    const {discussionId} = comment
+    const {discussionId, isBot} = comment
     const discussion = await dataLoader.get('discussions').load(discussionId)
     if (!discussion) {
       return {error: {message: 'Invalid discussion thread'}}
@@ -58,14 +59,15 @@ const addComment = {
       dataLoader.get('meetingMembers').load(meetingMemberId)
     ])
 
-    if (!viewerMeetingMember) {
+    if (!viewerMeetingMember && !isBot) {
       return {error: {message: 'Not a member of the meeting'}}
     }
 
     // VALIDATION
     const content = normalizeRawDraftJS(comment.content)
 
-    const dbComment = new Comment({...comment, content, createdBy: viewerId})
+    const createdBy = isBot ? 'aGhostUser' : viewerId
+    const dbComment = new Comment({...comment, content, createdBy})
     const {id: commentId, isAnonymous, threadParentId} = dbComment
     await r.table('Comment').insert(dbComment).run()
 
@@ -82,7 +84,7 @@ const addComment = {
     )!
     const {stages} = containsThreadablePhase
     const isAsync = stages.some((stage: GenericMeetingStage) => stage.isAsync)
-    analytics.commentAdded(viewerId, meeting, isAnonymous, isAsync, !!threadParentId)
+    analytics.commentAdded(createdBy, meeting, isAnonymous, isAsync, !!threadParentId)
     publish(SubscriptionChannel.MEETING, meetingId, 'AddCommentSuccess', data, subOptions)
     return data
   }
