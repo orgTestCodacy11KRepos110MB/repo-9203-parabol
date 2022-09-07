@@ -42,6 +42,7 @@ import MeetingMember from './MeetingMember'
 import NewFeatureBroadcast from './NewFeatureBroadcast'
 import Organization from './Organization'
 import OrganizationUser from './OrganizationUser'
+import RetroReflection from './RetroReflection'
 import RetroReflectionGroup from './RetroReflectionGroup'
 import SuggestedAction from './SuggestedAction'
 import Team from './Team'
@@ -508,6 +509,17 @@ const User: GraphQLObjectType<any, GQLContext> = new GraphQLObjectType<any, GQLC
     },
     tasks: require('../queries/tasks').default,
     team: require('../queries/team').default,
+    reflections: {
+      type: new GraphQLList(new GraphQLNonNull(RetroReflection)),
+      args: {
+        reflectionGroupId: {
+          type: GraphQLID
+        }
+      },
+      async resolve(_source: unknown, {reflectionGroupId}, {dataLoader}: GQLContext) {
+        return dataLoader.get('retroReflectionsByReflectionGroupId').load(reflectionGroupId)
+      }
+    },
     teamInvitation: {
       type: new GraphQLNonNull(TeamInvitationPayload),
       description: 'The invitation sent to the user, even if it was sent before they were a user',
