@@ -52,6 +52,12 @@ const DiscussionThread = (props: Props) => {
           ...DiscussionThreadList_viewer
           reflections(reflectionGroupId: $reflectionGroupId) {
             plaintextContent
+            prompt {
+              description
+            }
+            retroReflectionGroup {
+              title
+            }
           }
           discussion(id: $discussionId) {
             ...DiscussionThreadInput_discussion

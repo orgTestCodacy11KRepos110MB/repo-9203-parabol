@@ -241,10 +241,19 @@ const DiscussionThreadInput = forwardRef((props: Props, ref: any) => {
   }
 
   const summarizeTopic = async () => {
-    const text = reflections.reduce((prev, cur) => prev + '\n' + cur.plaintextContent, '')
-    const prompt = text + '\nTl;dr:\n'
+    const mapping = new Map()
+    reflections.forEach((reflection) => {
+      const prompt = reflection.prompt.description
+      if (!mapping.get(prompt)) {
+        mapping.set(prompt, [])
+      }
+      const contents = mapping.get(prompt)
+      contents.push(reflection.plaintextContent)
+      mapping.set(prompt, contents)
+    })
     const openaiManager = new OpenAIManager()
-    const response = await openaiManager.createCompletion(prompt)
+    console.log(mapping)
+    const response = await openaiManager.summarizeReflectionGroup(mapping)
     let topicSummary = ''
     if (response.status === 200) {
       topicSummary = response.data.choices[0].text

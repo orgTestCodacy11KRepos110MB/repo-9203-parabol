@@ -3,7 +3,7 @@ import {Configuration, OpenAIApi} from 'openai'
 class OpenAIManager {
   openai: any
 
-  createCompletion = async (prompt: string) => {
+  private createCompletion = async (prompt: string) => {
     return await this.openai.createCompletion({
       model: 'text-curie-001',
       prompt,
@@ -13,6 +13,19 @@ class OpenAIManager {
       frequency_penalty: 0,
       presence_penalty: 0
     })
+  }
+
+  summarizeReflectionGroup = async (promptReflectionMapping: Map<string, string[]>) => {
+    let reflectionStrings = ''
+    promptReflectionMapping.forEach((reflections, prompt) => {
+      const answers = reflections
+        .map((plaintextContent) => `someone answered '${plaintextContent}'`)
+        .join(', ')
+      reflectionStrings += `One the question '${prompt}', ${answers}.`
+    })
+    const prompt = `${reflectionStrings}\n\nTl;dr\n\n`
+    console.log(`prompt = ${prompt}`)
+    return await this.createCompletion(prompt)
   }
 
   constructor() {
