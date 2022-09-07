@@ -46,10 +46,13 @@ const DiscussionThread = (props: Props) => {
   const ref = useRef<HTMLDivElement>(null)
   const data = usePreloadedQuery<DiscussionThreadQuery>(
     graphql`
-      query DiscussionThreadQuery($discussionId: ID!) {
+      query DiscussionThreadQuery($discussionId: ID!, $reflectionGroupId: ID!) {
         viewer {
           ...DiscussionThreadInput_viewer
           ...DiscussionThreadList_viewer
+          reflections(reflectionGroupId: $reflectionGroupId) {
+            plaintextContent
+          }
           discussion(id: $discussionId) {
             ...DiscussionThreadInput_discussion
             ...DiscussionThreadList_discussion
@@ -87,7 +90,7 @@ const DiscussionThread = (props: Props) => {
       undefined,
       isDrawer
     ) || allowedThreadables.length === 0
-  const {discussion} = viewer
+  const {discussion, reflections} = viewer
   const commentors = discussion?.commentors ?? []
   const preferredNames = useMemo(
     () => commentors.filter(({id}) => id !== viewerId).map(({preferredName}) => preferredName),
@@ -121,6 +124,7 @@ const DiscussionThread = (props: Props) => {
       />
       <DiscussionThreadInput
         allowedThreadables={allowedThreadables}
+        reflections={reflections}
         dataCy='discuss-input'
         editorRef={editorRef}
         isDisabled={!!replyingToCommentId}

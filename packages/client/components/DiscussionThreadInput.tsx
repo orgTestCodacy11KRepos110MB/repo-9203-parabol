@@ -20,6 +20,7 @@ import useInitialLocalState from '../hooks/useInitialLocalState'
 import CreateTaskMutation from '../mutations/CreateTaskMutation'
 import {PALETTE} from '../styles/paletteV3'
 import anonymousAvatar from '../styles/theme/images/anonymous-avatar.svg'
+import OpenAIManager from '../utils/OpenAIManager'
 import {isViewerTypingInTask} from '../utils/viewerTypingUtils'
 import AddPollButton from './AddPollButton'
 import AddTaskButton from './AddTaskButton'
@@ -70,6 +71,7 @@ const ActionsContainer = styled('div')({
 
 interface Props {
   allowedThreadables: DiscussionThreadables[]
+  reflections?: any
   editorRef: RefObject<HTMLTextAreaElement>
   getMaxSortOrder: () => number
   discussion: DiscussionThreadInput_discussion
@@ -87,6 +89,7 @@ interface Props {
 const DiscussionThreadInput = forwardRef((props: Props, ref: any) => {
   const {
     allowedThreadables,
+    reflections,
     editorRef,
     getMaxSortOrder,
     discussion,
@@ -237,8 +240,17 @@ const DiscussionThreadInput = forwardRef((props: Props, ref: any) => {
     CreateTaskMutation(atmosphere, {newTask}, {})
   }
 
-  const summarizeTopic = () => {
-    const summary = `Summary: `
+  const summarizeTopic = async () => {
+    const text = reflections.reduce((prev, cur) => prev + '\n' + cur.plaintextContent, '')
+    const prompt = text + '\nTl;dr:\n'
+    const openaiManager = new OpenAIManager()
+    const response = await openaiManager.createCompletion(prompt)
+    let topicSummary = ''
+    if (response.status === 200) {
+      topicSummary = response.data.choices[0].text
+    }
+
+    const summary = `Summary: ${topicSummary}`
     const content = {
       blocks: [
         {

@@ -17,7 +17,7 @@ class OpenAIManager {
 
   constructor() {
     const configuration = new Configuration({
-      apiKey: process.env.OPENAI_API_KEY
+      apiKey: window.__ACTION__.openAi
     })
     this.openai = new OpenAIApi(configuration)
   }

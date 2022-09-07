@@ -9,6 +9,7 @@ import {DiscussionThreadables} from './DiscussionThreadList'
 interface Props {
   meetingContentRef?: RefObject<HTMLDivElement>
   discussionId: string
+  reflectionGroupId?: string
   allowedThreadables: DiscussionThreadables[]
   width?: string
   header?: ReactNode
@@ -16,8 +17,20 @@ interface Props {
 }
 
 const DiscussionThreadRoot = (props: Props) => {
-  const {allowedThreadables, meetingContentRef, discussionId, width, header, emptyState} = props
-  const queryRef = useQueryLoaderNow<DiscussionThreadQuery>(discussionThreadQuery, {discussionId})
+  const {
+    allowedThreadables,
+    meetingContentRef,
+    discussionId,
+    reflectionGroupId: originalReflectionGroupId,
+    width,
+    header,
+    emptyState
+  } = props
+  const reflectionGroupId = originalReflectionGroupId ?? ''
+  const queryRef = useQueryLoaderNow<DiscussionThreadQuery>(discussionThreadQuery, {
+    discussionId,
+    reflectionGroupId
+  })
   return (
     <Suspense fallback={''}>
       {queryRef && (
