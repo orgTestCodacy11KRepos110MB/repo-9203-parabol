@@ -5,10 +5,10 @@ class OpenAIManager {
 
   createCompletion = async (prompt: string) => {
     return await this.openai.createCompletion({
-      model: 'text-davinci-002',
+      model: 'text-curie-001',
       prompt,
-      temperature: 0.7,
-      max_tokens: 256,
+      temperature: 0,
+      max_tokens: 180,
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0
