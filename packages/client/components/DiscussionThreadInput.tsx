@@ -252,7 +252,6 @@ const DiscussionThreadInput = forwardRef((props: Props, ref: any) => {
       mapping.set(prompt, contents)
     })
     const openaiManager = new OpenAIManager()
-    console.log(mapping)
     const response = await openaiManager.summarizeReflectionGroup(mapping)
     let topicSummary = ''
     if (response.status === 200) {

@@ -1,12 +1,13 @@
-import {GraphQLFloat, GraphQLID, GraphQLNonNull, GraphQLObjectType} from 'graphql'
+import {GraphQLFloat, GraphQLID, GraphQLNonNull, GraphQLObjectType, GraphQLString} from 'graphql'
+import OpenAIManager from '../../../client/utils/OpenAIManager'
 import {NewMeetingPhaseTypeEnum} from '../../database/types/GenericMeetingPhase'
+import MeetingRetrospective from '../../database/types/MeetingRetrospective'
 import ReflectionGroup from '../../database/types/ReflectionGroup'
 import {GQLContext} from '../graphql'
 import Discussion from './Discussion'
 import DiscussionThreadStage, {discussionThreadStageFields} from './DiscussionThreadStage'
 import NewMeetingStage, {newMeetingStageFields} from './NewMeetingStage'
 import RetroReflectionGroup from './RetroReflectionGroup'
-import MeetingRetrospective from '../../database/types/MeetingRetrospective'
 
 const DUMMY_DISCUSSION = {
   id: 'dummy-discussion-id',
@@ -65,6 +66,38 @@ const RetroDiscussStage = new GraphQLObjectType<any, GQLContext>({
     sortOrder: {
       type: new GraphQLNonNull(GraphQLFloat),
       description: 'The sort order for reprioritizing discussion topics'
+    },
+    reflectionSummaryText: {
+      type: GraphQLString,
+      description: 'GPT-3 generated summary text for this discussion topic',
+      resolve: async ({reflectionGroupId}, _args: unknown, {dataLoader}) => {
+        const reflections = await dataLoader
+          .get('retroReflectionsByReflectionGroupId')
+          .load(reflectionGroupId)
+        const mapping = new Map()
+        await Promise.all(
+          reflections.map(async (reflection) => {
+            const promptId = reflection.promptId
+            const prompt = await dataLoader.get('reflectPrompts').load(promptId)
+            if (!mapping.get(prompt.description)) {
+              mapping.set(prompt.description, [])
+            }
+            const contents = mapping.get(prompt.description)
+            contents.push(reflection.plaintextContent)
+            mapping.set(prompt.description, contents)
+          })
+        )
+        console.log(mapping)
+        const openaiManager = new OpenAIManager()
+        const response = await openaiManager.summarizeReflectionGroup(mapping)
+        let topicSummary = ''
+        if (response.status === 200) {
+          topicSummary = response.data.choices[0].text
+        }
+        topicSummary.trim()
+
+        return `Summary: ${topicSummary}`
+      }
     }
   })
 })

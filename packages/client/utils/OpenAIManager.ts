@@ -24,13 +24,12 @@ class OpenAIManager {
       reflectionStrings += `One the question '${prompt}', ${answers}.`
     })
     const prompt = `${reflectionStrings}\n\nTl;dr\n\n`
-    console.log(`prompt = ${prompt}`)
     return await this.createCompletion(prompt)
   }
 
   constructor() {
     const configuration = new Configuration({
-      apiKey: window.__ACTION__.openAi
+      apiKey: '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'
     })
     this.openai = new OpenAIApi(configuration)
   }

@@ -59,7 +59,7 @@ interface Props {
 
 const RetroTopic = (props: Props) => {
   const {isDemo, isEmail, to, stage} = props
-  const {reflectionGroup, discussion} = stage
+  const {reflectionGroup, discussion, reflectionSummaryText} = stage
   const {commentCount} = discussion
   const {reflections, title, voteCount} = reflectionGroup!
   const imageSource = isEmail ? 'static' : 'local'
@@ -79,6 +79,13 @@ const RetroTopic = (props: Props) => {
         <td align='center' style={{paddingTop: 20}}>
           <AnchorIfEmail href={to} isDemo={isDemo} isEmail={isEmail} style={stageThemeHeading}>
             {title}
+          </AnchorIfEmail>
+        </td>
+      </tr>
+      <tr>
+        <td align='center'>
+          <AnchorIfEmail href={to} isEmail={isEmail} style={commentLinkStyle}>
+            {reflectionSummaryText}
           </AnchorIfEmail>
         </td>
       </tr>
@@ -125,6 +132,7 @@ export default createFragmentContainer(RetroTopic, {
       discussion {
         commentCount
       }
+      reflectionSummaryText
     }
   `
 })
