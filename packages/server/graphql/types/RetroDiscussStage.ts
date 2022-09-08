@@ -69,7 +69,7 @@ const RetroDiscussStage = new GraphQLObjectType<any, GQLContext>({
     },
     reflectionSummaryText: {
       type: GraphQLString,
-      description: 'GPT-3 generated summary text for this discussion topic',
+      description: 'GPT-3 generated summary text for the reflections on this topic',
       resolve: async ({reflectionGroupId}, _args: unknown, {dataLoader}) => {
         const reflections = await dataLoader
           .get('retroReflectionsByReflectionGroupId')
@@ -87,7 +87,6 @@ const RetroDiscussStage = new GraphQLObjectType<any, GQLContext>({
             mapping.set(prompt.description, contents)
           })
         )
-        console.log(mapping)
         const openaiManager = new OpenAIManager()
         const response = await openaiManager.summarizeReflectionGroup(mapping)
         let topicSummary = ''
@@ -97,6 +96,56 @@ const RetroDiscussStage = new GraphQLObjectType<any, GQLContext>({
         topicSummary.trim()
 
         return `Summary: ${topicSummary}`
+      }
+    },
+    discussionSummaryText: {
+      type: GraphQLString,
+      description: 'GPT-3 generated summary text for the discussion on this topic',
+      resolve: async (
+        {discussionId, reflectionGroupId},
+        _args: unknown,
+        {dataLoader}: GQLContext
+      ) => {
+        const reflectionGroup = await dataLoader
+          .get('retroReflectionGroups')
+          .load(reflectionGroupId)
+        const comments = await dataLoader.get('commentsByDiscussionId').load(discussionId)
+        const commentStrs: string[] = []
+        await Promise.all(
+          comments.map(async (comment) => {
+            const creatorName = comment.isAnonymous
+              ? 'Someone'
+              : (await dataLoader.get('users').load(comment.createdBy))?.preferredName
+            commentStrs.push(`${creatorName}: ${comment.plaintextContent}`)
+          })
+        )
+        const commentsStr = commentStrs.join('\n')
+        const openaiManager = new OpenAIManager()
+        const response = await openaiManager.summarizeDiscussion(
+          reflectionGroup.title ?? '',
+          commentsStr
+        )
+        let discussionSummary = ''
+        if (response.status === 200) {
+          discussionSummary = response.data.choices[0].text
+        }
+        discussionSummary.trim()
+
+        return `Discussions: ${discussionSummary}`
+      }
+    },
+    taskSummaryText: {
+      type: GraphQLString,
+      resolve: async ({discussionId}, _args: unknown, {dataLoader}: GQLContext) => {
+        const tasks = await dataLoader.get('tasksByDiscussionId').load(discussionId)
+        const taskCreators = new Set()
+        await Promise.all(
+          tasks.map(async (task) => {
+            const creatorName = (await dataLoader.get('users').load(task.createdBy))?.preferredName
+            taskCreators.add(creatorName ?? 'Someone')
+          })
+        )
+        return `${Array.from(taskCreators.values()).join(', ')} created tasks to follow up.`
       }
     }
   })

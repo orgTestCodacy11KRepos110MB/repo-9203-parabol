@@ -27,6 +27,11 @@ class OpenAIManager {
     return await this.createCompletion(prompt)
   }
 
+  summarizeDiscussion = async (topicTitle: string, commentsStr: string) => {
+    const prompt = `Summarize the meeting notes on the topic "${topicTitle}":\n${commentsStr}\n`
+    return await this.createCompletion(prompt)
+  }
+
   constructor() {
     const configuration = new Configuration({
       apiKey: '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'

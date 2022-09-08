@@ -50,6 +50,11 @@ const noCommentLinkStyle = {
   color: PALETTE.SLATE_600
 }
 
+const summaryStyle = {
+  ...noCommentLinkStyle,
+  margin: '10px'
+}
+
 interface Props {
   isDemo: boolean
   isEmail: boolean
@@ -59,7 +64,13 @@ interface Props {
 
 const RetroTopic = (props: Props) => {
   const {isDemo, isEmail, to, stage} = props
-  const {reflectionGroup, discussion, reflectionSummaryText} = stage
+  const {
+    reflectionGroup,
+    discussion,
+    reflectionSummaryText,
+    discussionSummaryText,
+    taskSummaryText
+  } = stage
   const {commentCount} = discussion
   const {reflections, title, voteCount} = reflectionGroup!
   const imageSource = isEmail ? 'static' : 'local'
@@ -83,9 +94,23 @@ const RetroTopic = (props: Props) => {
         </td>
       </tr>
       <tr>
-        <td align='center'>
-          <AnchorIfEmail href={to} isEmail={isEmail} style={commentLinkStyle}>
+        <td align='left'>
+          <AnchorIfEmail href={to} isEmail={isEmail} style={summaryStyle}>
             {reflectionSummaryText}
+          </AnchorIfEmail>
+        </td>
+      </tr>
+      <tr>
+        <td align='left'>
+          <AnchorIfEmail href={to} isEmail={isEmail} style={summaryStyle}>
+            {discussionSummaryText}
+          </AnchorIfEmail>
+        </td>
+      </tr>
+      <tr>
+        <td align='left'>
+          <AnchorIfEmail href={to} isEmail={isEmail} style={summaryStyle}>
+            {taskSummaryText}
           </AnchorIfEmail>
         </td>
       </tr>
@@ -133,6 +158,8 @@ export default createFragmentContainer(RetroTopic, {
         commentCount
       }
       reflectionSummaryText
+      discussionSummaryText
+      taskSummaryText
     }
   `
 })
