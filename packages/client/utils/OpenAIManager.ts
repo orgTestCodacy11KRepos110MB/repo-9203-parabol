@@ -34,7 +34,7 @@ class OpenAIManager {
 
   constructor() {
     const configuration = new Configuration({
-      apiKey: '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'
+      apiKey: process.env.OPENAI_API_KEY
     })
     this.openai = new OpenAIApi(configuration)
   }
