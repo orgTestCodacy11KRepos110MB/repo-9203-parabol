@@ -95,7 +95,7 @@ const RetroDiscussStage = new GraphQLObjectType<any, GQLContext>({
         }
         topicSummary.trim()
 
-        return `Summary: ${topicSummary}`
+        return `Topic summary: ${topicSummary}`
       }
     },
     discussionSummaryText: {
@@ -110,6 +110,9 @@ const RetroDiscussStage = new GraphQLObjectType<any, GQLContext>({
           .get('retroReflectionGroups')
           .load(reflectionGroupId)
         const comments = await dataLoader.get('commentsByDiscussionId').load(discussionId)
+        if (comments.length === 0) {
+          return `No discussion was taken down for this topic`
+        }
         const commentStrs: string[] = []
         await Promise.all(
           comments.map(async (comment) => {
@@ -131,7 +134,7 @@ const RetroDiscussStage = new GraphQLObjectType<any, GQLContext>({
         }
         discussionSummary.trim()
 
-        return `Discussions: ${discussionSummary}`
+        return `Topic discussions: ${discussionSummary}`
       }
     },
     taskSummaryText: {
@@ -145,7 +148,9 @@ const RetroDiscussStage = new GraphQLObjectType<any, GQLContext>({
             taskCreators.add(creatorName ?? 'Someone')
           })
         )
-        return `${Array.from(taskCreators.values()).join(', ')} created tasks to follow up.`
+        return `${
+          taskCreators.size > 0 ? Array.from(taskCreators.values()).join(', ') : 'Nobody'
+        } created tasks to follow up.`
       }
     }
   })

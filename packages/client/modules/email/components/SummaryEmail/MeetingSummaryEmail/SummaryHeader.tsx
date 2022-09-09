@@ -33,6 +33,16 @@ const dateLabel = {
   paddingTop: 8
 } as React.CSSProperties
 
+const summaryStyle = {
+  display: 'block',
+  fontFamily: FONT_FAMILY.SANS_SERIF,
+  fontSize: 13,
+  fontWeight: 600,
+  textDecoration: 'none',
+  color: PALETTE.SLATE_600,
+  margin: '10px'
+}
+
 interface Props {
   meeting: SummaryHeader_meeting
   isDemo?: boolean
@@ -40,7 +50,7 @@ interface Props {
 
 const SummaryHeader = (props: Props) => {
   const {meeting, isDemo} = props
-  const {createdAt, name: meetingName, team} = meeting
+  const {createdAt, name: meetingName, team, meetingSummaryText} = meeting
   const {name: teamName} = team
   const meetingDate = makeDateString(createdAt, {showDay: true})
   return (
@@ -72,6 +82,11 @@ const SummaryHeader = (props: Props) => {
             {isDemo ? meetingDate : `${teamName} • ${meetingDate}`}
           </td>
         </tr>
+        <tr>
+          <td align='center' style={summaryStyle}>
+            {meetingSummaryText}
+          </td>
+        </tr>
       </tbody>
     </table>
   )
@@ -84,6 +99,9 @@ export default createFragmentContainer(SummaryHeader, {
       name
       team {
         name
+      }
+      ... on RetrospectiveMeeting {
+        meetingSummaryText
       }
     }
   `

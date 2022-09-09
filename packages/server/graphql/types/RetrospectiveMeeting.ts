@@ -6,9 +6,11 @@ import {
   GraphQLInt,
   GraphQLList,
   GraphQLNonNull,
-  GraphQLObjectType
+  GraphQLObjectType,
+  GraphQLString
 } from 'graphql'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
+import OpenAIManager from '../../../client/utils/OpenAIManager'
 import ReflectionGroupType from '../../database/types/ReflectionGroup'
 import RetroMeetingMember from '../../database/types/RetroMeetingMember'
 import {getUserId} from '../../utils/authorization'
@@ -192,6 +194,36 @@ const RetrospectiveMeeting: GraphQLObjectType<any, GQLContext> = new GraphQLObje
         const meetingMemberId = toTeamMemberId(meetingId, viewerId)
         const meetingMember = await dataLoader.get('meetingMembers').load(meetingMemberId)
         return meetingMember || null
+      }
+    },
+    meetingSummaryText: {
+      type: GraphQLString,
+      description: 'GPT-3 generated meeting Tl;dr',
+      resolve: async ({id: meetingId}, _args: unknown, {dataLoader}: GQLContext) => {
+        const reflections = await dataLoader.get('retroReflectionsByMeetingId').load(meetingId)
+        const mapping = new Map()
+        await Promise.all(
+          reflections.map(async (reflection) => {
+            const promptId = reflection.promptId
+            const prompt = await dataLoader.get('reflectPrompts').load(promptId)
+            if (!mapping.get(prompt.description)) {
+              mapping.set(prompt.description, [])
+            }
+            const contents = mapping.get(prompt.description)
+            contents.push(reflection.plaintextContent)
+            mapping.set(prompt.description, contents)
+          })
+        )
+        const openaiManager = new OpenAIManager()
+        console.log(mapping)
+        const response = await openaiManager.summarizeReflectionGroup(mapping)
+        let meetingSummary = ''
+        if (response.status === 200) {
+          meetingSummary = response.data.choices[0].text
+        }
+        meetingSummary.trim()
+
+        return `Meeting summary (Tl;dr): ${meetingSummary}`
       }
     }
   })
