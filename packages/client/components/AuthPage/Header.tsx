@@ -31,7 +31,7 @@ const Img = styled('img')({
 export default () => (
   <HeaderContainer>
     <HeaderBrand to='/' title='Parabol Home'>
-      <Img crossOrigin='' src={parabolLogo} alt='' />
+      <Img src={parabolLogo} alt='' />
     </HeaderBrand>
   </HeaderContainer>
 )

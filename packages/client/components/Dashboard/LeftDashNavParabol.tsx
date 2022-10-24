@@ -24,7 +24,7 @@ const Label = styled('div')({
 const LeftDashParabol = () => {
   return (
     <Parabol>
-      <img crossOrigin='' alt='Parabol' src={parabolLogo} />
+      <img alt='Parabol' src={parabolLogo} />
       <Label>{'PARABOL'}</Label>
     </Parabol>
   )

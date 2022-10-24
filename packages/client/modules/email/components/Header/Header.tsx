@@ -32,7 +32,6 @@ const Header = (props: Props) => {
           <td align='left' style={cellStyle}>
             <a style={linkStyle} href={dashURL}>
               <img
-                crossOrigin=''
                 alt='Parabol, Inc. Logo'
                 height={42}
                 src={`${ExternalLinks.EMAIL_CDN}email-header-branding-color@3x.png`}

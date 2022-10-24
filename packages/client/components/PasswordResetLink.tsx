@@ -66,7 +66,7 @@ const PasswordResetLink = (props: Props) => {
 
   return (
     <Wrapper>
-      <StyledIcon crossOrigin='' src={passwordIcon} alt='Password icon' />
+      <StyledIcon src={passwordIcon} alt='Password icon' />
       {isClicked ? (
         <>
           {error ? (

@@ -42,7 +42,7 @@ const InvoiceFooter = () => {
           <b>{ContactInfo.EMAIL_BILLING}</b>
         </a>
       </Copy>
-      <Lockup crossOrigin='' alt='Logo for Parabol' src={parabolMark} />
+      <Lockup alt='Logo for Parabol' src={parabolMark} />
       <FinePrint>
         {'Parabol, Inc.'}
         <br />

@@ -114,7 +114,7 @@ const DashTopBar = (props: Props) => {
           <Icon>{'menu'}</Icon>
         </LeftNavToggle>
         <LogoWrapper onClick={gotoHome}>
-          <img crossOrigin='' src={parabolLogo} alt='Parabol logo' />
+          <img src={parabolLogo} alt='Parabol logo' />
         </LogoWrapper>
       </LeftNavHeader>
       <TopBarMain>

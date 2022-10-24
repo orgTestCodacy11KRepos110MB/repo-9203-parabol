@@ -31,7 +31,7 @@ const ExportToCSVButton = (props: Props) => {
   const {handleClick} = props
   return (
     <Button onClick={handleClick}>
-      <Img crossOrigin='' alt={label} src={`${ExternalLinks.EMAIL_CDN}cloud_download.png`} />
+      <Img alt={label} src={`${ExternalLinks.EMAIL_CDN}cloud_download.png`} />
       <Label>{label}</Label>
     </Button>
   )

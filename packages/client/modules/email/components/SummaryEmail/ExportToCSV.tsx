@@ -355,7 +355,6 @@ const ExportToCSV = (props: Props) => {
         <td align='center' style={iconLinkLabel} width='100%'>
           <AnchorIfEmail isEmail={referrer === 'email'} href={emailCSVUrl} title={label}>
             <img
-              crossOrigin=''
               alt={label}
               src={`${ExternalLinks.EMAIL_CDN}cloud_download.png`}
               style={imageStyle}

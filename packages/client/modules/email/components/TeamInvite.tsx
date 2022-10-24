@@ -137,7 +137,7 @@ const TeamInvite = (props: TeamInviteProps) => {
           style={videoLinkStyle}
           title='Retro 101'
         >
-          <img crossOrigin='' alt='' src={videoGraphicSrc} style={videoGraphicStyle} />
+          <img alt='' src={videoGraphicSrc} style={videoGraphicStyle} />
         </a>
         <EmptySpace height={24} />
         <p style={emailCopyStyle}>

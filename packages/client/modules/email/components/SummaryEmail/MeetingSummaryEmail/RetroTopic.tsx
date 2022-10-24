@@ -85,7 +85,7 @@ const RetroTopic = (props: Props) => {
       <tr>
         <td align='center' style={votesBlock}>
           <AnchorIfEmail href={to} isDemo={isDemo} isEmail={isEmail}>
-            <img crossOrigin='' height='18' src={src} width='18' style={imageStyle} />
+            <img height='18' src={src} width='18' style={imageStyle} />
           </AnchorIfEmail>
           <AnchorIfEmail href={to} isDemo={isDemo} isEmail={isEmail} style={voteCountStyle}>
             {voteCount}

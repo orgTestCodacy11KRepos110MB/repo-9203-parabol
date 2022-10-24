@@ -49,7 +49,6 @@ const SummaryHeader = (props: Props) => {
         <tr>
           <td align='center' style={{paddingTop: 16}}>
             <img
-              crossOrigin=''
               alt='Parabol Logo'
               src={`${ExternalLinks.EMAIL_CDN}mark-color@3x.png`}
               height='32'
