@@ -1,13 +1,14 @@
 import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
-import React from 'react'
-import {createFragmentContainer} from 'react-relay'
+import React, {useEffect} from 'react'
+import {useFragment} from 'react-relay'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useDocumentTitle from '../hooks/useDocumentTitle'
 import useRouter from '../hooks/useRouter'
+import AcceptTeamInvitationMutation from '../mutations/AcceptTeamInvitationMutation'
 import PushInvitationMutation from '../mutations/PushInvitationMutation'
 import hasToken from '../utils/hasToken'
-import {InvitationLinkErrorExpired_massInvitation} from '../__generated__/InvitationLinkErrorExpired_massInvitation.graphql'
+import {InvitationLinkErrorExpired_massInvitation$key} from '../__generated__/InvitationLinkErrorExpired_massInvitation.graphql'
 import DialogContent from './DialogContent'
 import DialogTitle from './DialogTitle'
 import FlatPrimaryButton from './FlatPrimaryButton'
@@ -16,7 +17,7 @@ import InviteDialog from './InviteDialog'
 import LinkButton from './LinkButton'
 
 interface Props {
-  massInvitation: InvitationLinkErrorExpired_massInvitation
+  massInvitationRef: InvitationLinkErrorExpired_massInvitation$key
 }
 
 const TeamName = styled('span')({
@@ -36,12 +37,47 @@ const DashboardButton = styled(LinkButton)({
 })
 
 const InvitationLinkErrorExpired = (props: Props) => {
-  const {massInvitation} = props
-  const {teamName, teamId} = massInvitation
+  const {massInvitationRef} = props
   useDocumentTitle(`Token Expired | Invitation Link`, 'Invitation Link')
 
   const {history} = useRouter()
   const atmosphere = useAtmosphere()
+
+  const massInvitation = useFragment(
+    graphql`
+      fragment InvitationLinkErrorExpired_massInvitation on MassInvitationPayload {
+        teamName
+        teamId
+
+        teamInvitation {
+          teamInvitation {
+            token
+          }
+          teamId
+          meetingId
+        }
+      }
+    `,
+    massInvitationRef
+  )
+
+  const {teamName, teamId} = massInvitation
+  const teamInvitation = massInvitation.teamInvitation.teamInvitation
+
+  useEffect(
+    () => {
+      if (teamInvitation) {
+        console.log('accept Team Inv')
+        // if an invitation already exists, accept it
+        AcceptTeamInvitationMutation(atmosphere, {invitationToken: teamInvitation.token}, {history})
+        return
+      }
+      return undefined
+    },
+    [
+      /* eslint-disable-line react-hooks/exhaustive-deps*/
+    ]
+  )
 
   const requestInvite = () => {
     if (teamId) {
@@ -92,11 +128,4 @@ const InvitationLinkErrorExpired = (props: Props) => {
   )
 }
 
-export default createFragmentContainer(InvitationLinkErrorExpired, {
-  massInvitation: graphql`
-    fragment InvitationLinkErrorExpired_massInvitation on MassInvitationPayload {
-      teamName
-      teamId
-    }
-  `
-})
+export default InvitationLinkErrorExpired

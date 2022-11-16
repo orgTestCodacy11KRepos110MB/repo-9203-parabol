@@ -33,7 +33,7 @@ const InvitationLinkDialog = (props: Props) => {
     case 'notFound':
       return <TeamInvitationErrorNotFound isMassInvite />
     case 'expired':
-      return <InvitationLinkErrorExpired massInvitation={massInvitation} />
+      return <InvitationLinkErrorExpired massInvitationRef={massInvitation} />
   }
   const {authToken} = atmosphere
   if (authToken) {
